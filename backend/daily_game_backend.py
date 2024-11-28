@@ -82,10 +82,10 @@ class DailyCountryGame:
                 random.shuffle(self.country_pool)
                 return
             print("Failed to fetch countries")
-            self._load_backup_countries()
+            # self._load_backup_countries()
         except Exception as e:
             print(f"Error fetching country pool: {str(e)}")
-            self._load_backup_countries()
+            # self._load_backup_countries()
 
     def _process_images(self):
         """Process and blur flag image while maintaining original dimensions"""
@@ -128,17 +128,17 @@ class DailyCountryGame:
             self._use_placeholder_image()
 
 
-    def _load_backup_countries(self):
-        """Load backup country data in case API fails"""
-        self.country_pool = [
-            {
-                'name': {'common': 'United States'},
-                'flags': {'png': 'https://flagcdn.com/w320/us.png'},
-                'capital': ['Washington, D.C.'],
-                'region': 'Americas',
-                'population': 331002651
-            }
-        ]
+    # def _load_backup_countries(self):
+    #     """Load backup country data in case API fails"""
+    #     self.country_pool = [
+    #         {
+    #             'name': {'common': 'United States'},
+    #             'flags': {'png': 'https://flagcdn.com/w320/us.png'},
+    #             'capital': ['Washington, D.C.'],
+    #             'region': 'Americas',
+    #             'population': 331002651
+    #         }
+    #     ]
     
     def get_daily_country(self):
         """Get or generate country for current day"""
@@ -156,8 +156,8 @@ class DailyCountryGame:
                 if not self.country_pool:
                     self._fetch_country_pool()
                 
-                if not self.country_pool:
-                    self._load_backup_countries()
+                # if not self.country_pool:
+                #     self._load_backup_countries()
                 
                 if self.country_pool:
                     country = self.country_pool[0]
