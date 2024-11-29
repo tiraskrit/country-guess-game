@@ -15,14 +15,14 @@ from apscheduler.schedulers.background import BackgroundScheduler
 app = Flask(__name__)
 CORS(app)
 
-CACHE_FILE = 'daily_country_cache.json'
-
 class DailyCountryGame:
     def __init__(self):
         self.current_country = None
         self.blurred_flag = None
         self.last_reset_date = None
         self.country_pool = []
+        self.cached_country = None
+        self.cached_date = None
         
     def _get_current_date(self):
         """Get current UTC date string"""
@@ -30,29 +30,15 @@ class DailyCountryGame:
     
     def _load_cache(self):
         """Load cached country data if it exists"""
-        if os.path.exists(CACHE_FILE):
-            try:
-                with open(CACHE_FILE, 'r') as f:
-                    cache = json.load(f)
-                    cached_date = cache.get('date')
-
-                    if cached_date == self._get_current_date():
-                        return cache.get('country')
-                    else:
-                        # Explicitly clear cache for previous days
-                        return None
-            except (json.JSONDecodeError, KeyError):
-                return None
+        current_date = self._get_current_date()
+        if self.cached_date == current_date and self.cached_country:
+            return self.cached_country
         return None
     
     def _save_cache(self, country_data):
         """Save country data to cache"""
-        cache = {
-            'date': self._get_current_date(),
-            'country': country_data
-        }
-        with open(CACHE_FILE, 'w') as f:
-            json.dump(cache, f)
+        self.cached_date = self._get_current_date()
+        self.cached_country = country_data
     
     def _fetch_country_pool(self):
         try:
@@ -276,10 +262,9 @@ def check_guess():
     return jsonify(response)
 
 if __name__ == '__main__':
-    # Start a scheduler to run daily_check() every 24 hours
     scheduler = BackgroundScheduler()
     scheduler.add_job(game.daily_check, 'interval', days=1, 
-                     start_date='2024-11-09 00:00:00',  # Set specific start time
-                     timezone=timezone.utc)  # Explicitly set timezone
+                     start_date='2024-11-09 00:00:00',
+                     timezone=timezone.utc)
     scheduler.start()
     app.run()
